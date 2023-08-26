@@ -9,6 +9,13 @@ let uid = Math.random(Math.random() * 10_000).toString();
 let client;
 let channel;
 
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString)
+let roomId = urlParams.get('room');
+if (!roomId) {
+    window.location = "lobby.html";
+}
+
 
 const servers = {
     iceServers: [
@@ -51,7 +58,7 @@ const init = async () => {
     client = await AgoraRTM.createInstance(APP_ID);
     await client.login({ uid, token });
 
-    channel = client.createChannel('main');
+    channel = client.createChannel(roomId);
 
     await channel.join();
 
@@ -60,7 +67,8 @@ const init = async () => {
 
     client.on('MessageFromPeer', handleMessageFromPeer)
 
-    localStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true, });
+    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+    // localStream = await navigator.mediaDevices.getUserMedia({ video: true });
     document.getElementById('user-1').srcObject = localStream;
 
 }
@@ -73,7 +81,7 @@ const createPeerConnection = async (MemberId) => {
     document.getElementById('user-2').style.display = "block";
 
     if (!localStream) {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true, });
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
         document.getElementById('user-1').srcObject = localStream;
     }
 
@@ -128,6 +136,32 @@ const leaveChannel = async () => {
     await channel.leave();
     await client.logout();
 }
+const toggleCamera = async () => {
+    const videoTrack = localStream.getTracks().find(track => track.kind === 'video')
+    if (videoTrack.enabled) {
+        videoTrack.enabled = false;
+        document.getElementById('camera-btn').style.backgroundColor = 'rgb(255,80,80)';
+    } else {
+        videoTrack.enabled = true;
+        document.getElementById('camera-btn').style.backgroundColor = 'rgba(179,102,249,0.9)';
+    }
+}
+const toggleMic = async () => {
+    const audioTrack = localStream.getTracks().find(track => track.kind === 'audio')
+    console.log(audioTrack);
+    if (audioTrack.enabled) {
+        audioTrack.enabled = false;
+        document.getElementById('mic-btn').style.backgroundColor = 'rgb(255,80,80)';
+    } else {
+        audioTrack.enabled = true;
+        document.getElementById('mic-btn').style.backgroundColor = 'rgba(179,102,249,0.9)';
+    }
+}
+
+document.getElementById('camera-btn').addEventListener('click', toggleCamera)
+document.getElementById('mic-btn').addEventListener('click', toggleMic)
+
 
 window.addEventListener('beforeunload', leaveChannel)
+
 init();
