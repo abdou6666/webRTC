@@ -31,6 +31,8 @@ const handleUserJoined = async (MemberId) => {
 
 }
 const handleUserLeft = async (memberId) => {
+    document.getElementById('user-1').classList.remove('smallFrame')
+
     document.getElementById('user-2').style.display = 'none'
 }
 const handleMessageFromPeer = async (message, memberId) => {
@@ -79,6 +81,7 @@ const createPeerConnection = async (MemberId) => {
     remoteStream = new MediaStream();
     document.getElementById('user-2').srcObject = remoteStream;
     document.getElementById('user-2').style.display = "block";
+    document.getElementById('user-1').classList.add('smallFrame')
 
     if (!localStream) {
         localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
