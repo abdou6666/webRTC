@@ -56,6 +56,14 @@ const handleMessageFromPeer = async (message, memberId) => {
     }
 }
 
+const constraints = {
+    video: {
+        width: { min: 640, ideal: 1920, max: 1920 },
+        height: { min: 480, ideal: 1080, max: 1080 },
+    },
+    audio: true
+}
+
 const init = async () => {
     client = await AgoraRTM.createInstance(APP_ID);
     await client.login({ uid, token });
@@ -69,7 +77,7 @@ const init = async () => {
 
     client.on('MessageFromPeer', handleMessageFromPeer)
 
-    localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+    localStream = await navigator.mediaDevices.getUserMedia(constraints);
     // localStream = await navigator.mediaDevices.getUserMedia({ video: true });
     document.getElementById('user-1').srcObject = localStream;
 
@@ -84,7 +92,7 @@ const createPeerConnection = async (MemberId) => {
     document.getElementById('user-1').classList.add('smallFrame')
 
     if (!localStream) {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        localStream = await navigator.mediaDevices.getUserMedia(constraints);
         document.getElementById('user-1').srcObject = localStream;
     }
 
